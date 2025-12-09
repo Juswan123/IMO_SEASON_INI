@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'feed_screen.dart';
+import 'register_screen.dart';
+import 'main_nav_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -65,11 +66,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 // LOGIC SEMENTARA: Langsung masuk ke Feed tanpa cek password
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const FeedScreen()),
+                  MaterialPageRoute(builder: (context) => const MainNavScreen()),
                 );
               },
               child: const Text("Masuk Aplikasi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
+            const SizedBox(height: 16),
+
+            TextButton(
+              onPressed: (){
+                Navigator.push(
+                  context, 
+                  MaterialPageRoute(builder: (context) => const RegisterScreen()),
+                );
+              }, 
+              child: const Text("Belum punya akun? Daftar di sini.", style: TextStyle(color: Colors.orange)),
+            )
           ],
         ),
       ),
