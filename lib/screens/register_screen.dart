@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'main_nav_screen.dart';
+// import 'main_nav_screen.dart';
 import 'otp_screen.dart';
+import '../services/auth_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -10,10 +11,14 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // Controller untuk input email/password
+  // Controller untuk input
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
+
+  // Service and state
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +40,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 30),
 
             // OPSI 1: DAFTAR DENGAN GOOGLE
-            // Tombol ini akan memiliki icon Google yang jelas
-            _buildGoogleButton(context),
+            _isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+                : _buildGoogleButton(context),
+                
             const SizedBox(height: 30),
 
             // Divider "ATAU"
@@ -90,29 +97,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 24),
 
             // Tombol Daftar dengan Email
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () {
-                // Navigasi ke OTP Screen
-                // Kita kirim data dummy email untuk ditampilkan
-                String emailInput = _emailController.text.isNotEmpty 
-                    ? _emailController.text 
-                    : "email@contoh.com";
+            _isLoading
+                ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+                : ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () async {
+                      // 1. Validasi Input Kosong
+                      if (_emailController.text.isEmpty ||
+                          _passwordController.text.isEmpty ||
+                          _usernameController.text.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Semua kolom harus diisi!")));
+                        return;
+                      }
 
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OtpScreen(emailOrPhone: emailInput),
-                  ),
-                );
-              },
-              child: const Text("Daftar dengan Email", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            ),
+                      // 2. Mulai Loading
+                      setState(() => _isLoading = true);
+
+                      // 3. Panggil Firebase Register dari Service
+                      // Pastikan class AuthService memiliki method registerWithEmail
+                      String? result = await _authService.registerWithEmail(
+                        email: _emailController.text.trim(),
+                        password: _passwordController.text.trim(),
+                        username: _usernameController.text.trim(),
+                      );
+
+                      if (!mounted) return;
+
+                      // 4. Stop Loading
+                      setState(() => _isLoading = false);
+
+                      // 5. Cek Hasil
+                      if (result == null) {
+                        // SUKSES -> Ke OTP Screen
+                        if (!mounted) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => OtpScreen(emailOrPhone: _emailController.text),
+                          ),
+                        );
+                      } else {
+                        // GAGAL -> Tampilkan Error
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Error: $result")));
+                      }
+                    },
+                  child: const Text("Daftar dengan Email",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+
             const SizedBox(height: 20),
             
             // Link Kembali ke Login
@@ -136,35 +176,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         side: BorderSide(color: Colors.grey.shade300),
       ),
-      onPressed: () {
-        // LOGIC DUMMY: Tampilkan notifikasi dan navigasi
-        _showSuccess(context, "Google");
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const OtpScreen(emailOrPhone: "user.google@gmail.com"),
-          ),
-        );
+      onPressed: () async {
+        // LOGIC Google Sign in.
+        setState(() => _isLoading = true);
+
+        String? result = await _authService.signInWithGoogleWeb();
+        
+        if (!mounted) return;
+
+        setState(() => _isLoading = false);
+
+        if(result == null){
+          Navigator.push(
+            context, 
+            MaterialPageRoute(
+              builder: (context) => const OtpScreen(emailOrPhone: "Akun Google")
+            ),
+          );
+        }else{
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+        }
       },
       icon: const Image(
         image: AssetImage('assets/google_logo.png'), 
-        height: 24.0, // Nanti perlu ditambahkan logo Google di folder assets
+        height: 24.0,
       ),
       label: const Text(
         "Daftar dengan Google",
         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
       ),
     );
-  }
-
-  void _showSuccess(BuildContext context, String method) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Simulasi Daftar Berhasil via $method!"))
-      );
-      // Navigasi ke Home Screen setelah pendaftaran
-      Navigator.pushReplacement(
-        context, 
-        MaterialPageRoute(builder: (context) => const MainNavScreen())
-      );
   }
 }

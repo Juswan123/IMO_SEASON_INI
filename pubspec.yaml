@@ -4,16 +4,24 @@ publish_to: 'none'
 version: 0.1.0
 
 environment:
-  sdk: ^3.10.3
+  sdk: '>=3.10.0 <4.0.0' # Ubah sedikit formatnya agar lebih fleksibel
 
 dependencies:
   flutter:
     sdk: flutter
 
+  # Versi Firebase yang Stabil & Cocok
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.5
+  google_sign_in: ^6.2.1
+  provider: ^6.1.2
+  cupertino_icons: ^1.0.6
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
+  flutter_lints: ^3.0.0 # Versi 6.0.0 kadang butuh Dart SDK sangat baru, kita turunkan ke 3.0.0 biar aman
 
 flutter:
   uses-material-design: true

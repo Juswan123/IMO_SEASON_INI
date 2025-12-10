@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'main_nav_screen.dart';
+import '../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -10,6 +11,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  // Controller input
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  // Service and state
+  final AuthService _auth = AuthService();
+  bool _isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,6 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
             
             // Input Email
             TextField(
+              controller: _emailController,
               decoration: InputDecoration(
                 labelText: "Email",
                 prefixIcon: const Icon(Icons.email_outlined),
@@ -45,6 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
             
             // Input Password
             TextField(
+              controller: _passwordController,
               obscureText: true,
               decoration: InputDecoration(
                 labelText: "Password",
@@ -63,11 +75,41 @@ class _LoginScreenState extends State<LoginScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onPressed: () {
-                // LOGIC SEMENTARA: Langsung masuk ke Feed tanpa cek password
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MainNavScreen()),
-                );
+                _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: Colors.orange))
+                  : ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: () async {
+                        if (_emailController.text.isEmpty || _passwordController.text.isEmpty) return;
+
+                        setState(() => _isLoading = true);
+                        
+                        String? result = await _auth.signInWithEmail(
+                          email: _emailController.text.trim(),
+                          password: _passwordController.text.trim()
+                        );
+
+                        if (!mounted) return;
+                        
+                        setState(() => _isLoading = false);
+
+                        if (result == null) {
+                          // Login Sukses -> Langsung ke Beranda (Lewati OTP kalau Login biasa).
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MainNavScreen()),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(result)));
+                        }
+                      },
+                      child: const Text("Masuk Aplikasi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    );
               },
               child: const Text("Masuk Aplikasi", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
