@@ -1,26 +1,36 @@
 {
   "project_info": {
-    "project_number": "133421730396",
-    "project_id": "main-5ab56",
-    "storage_bucket": "main-5ab56.firebasestorage.app"
+    "project_number": "257919411566",
+    "project_id": "main-makanan-info",
+    "storage_bucket": "main-makanan-info.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:133421730396:android:e8e6e1ae2dc1c4c4f07499",
+        "mobilesdk_app_id": "1:257919411566:android:0b8d6c89a8a55341194d7f",
         "android_client_info": {
-          "package_name": "mamos.com"
+          "package_name": "com.example.makanan_info"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "257919411566-h6tpb1h5he8tcqhvlpbrith5dmc02h4g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyBO4GZo532lI6hEhIqLGLBP0f5jP9rEUj0"
+          "current_key": "AIzaSyBNxXsT-vZzojvVdUGLC5mNYT4iMWgH9gg"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "257919411566-h6tpb1h5he8tcqhvlpbrith5dmc02h4g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
